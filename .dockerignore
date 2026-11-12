@@ -1,0 +1,6 @@
+.git
+.github
+.mvn
+target/*
+!target/spring-petclinic-*.jar
+.env
