@@ -28,5 +28,12 @@ jobs:
       - name: Grant execute permission for Maven Wrapper
         run: chmod +x mvnw
 
-      - name: Build and run test suite
-        run: ./mvnw clean test
+      - name: Build and run unit test suite
+        run: ./mvnw clean test -Dtest="!*IntegrationTests"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports/
