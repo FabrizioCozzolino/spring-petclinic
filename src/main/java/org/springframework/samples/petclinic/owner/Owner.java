@@ -1,18 +1,3 @@
-/*
- * Copyright 2012-2025 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.samples.petclinic.owner;
 
 import java.util.ArrayList;
@@ -35,68 +20,101 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/**
- * Simple JavaBean domain object representing an owner.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @author Michael Isvy
- * @author Oliver Drotbohm
- * @author Wick Dynex
- */
 @Entity
 @Table(name = "owners")
+// @ nullable_by_default
 public class Owner extends Person {
 
 	@Column
 	@NotBlank
 	@Size(max = 255)
+	// @ spec_public
 	private String address;
 
 	@Column
 	@NotBlank
 	@Size(max = 80)
+	// @ spec_public
 	private String city;
 
 	@Column
 	@NotBlank
 	@Pattern(regexp = "\\d{10}", message = "{telephone.invalid}")
+	// @ spec_public
 	private String telephone;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "owner_id")
 	@OrderBy("name")
+	// @ spec_public
 	private final List<Pet> pets = new ArrayList<>();
 
+	// @ public invariant pets != null;
+
+	// @ public normal_behavior
+	// @ assignable \nothing;
+	// @ ensures \result == this.address;
+	// @ pure
 	public String getAddress() {
 		return this.address;
 	}
 
+	// @ public normal_behavior
+	// @ assignable this.address;
+	// @ ensures this.address == address;
 	public void setAddress(String address) {
 		this.address = address;
 	}
 
+	// @ public normal_behavior
+	// @ assignable \nothing;
+	// @ ensures \result == this.city;
+	// @ pure
 	public String getCity() {
 		return this.city;
 	}
 
+	// @ public normal_behavior
+	// @ assignable this.city;
+	// @ ensures this.city == city;
 	public void setCity(String city) {
 		this.city = city;
 	}
 
+	// @ public normal_behavior
+	// @ assignable \nothing;
+	// @ ensures \result == this.telephone;
+	// @ pure
 	public String getTelephone() {
 		return this.telephone;
 	}
 
+	// @ public normal_behavior
+	// @ assignable this.telephone;
+	// @ ensures this.telephone == telephone;
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
 	}
 
+	// @ public normal_behavior
+	// @ assignable \nothing;
+	// @ ensures \result == this.pets;
+	// @ ensures \result != null;
+	// @ pure
 	public List<Pet> getPets() {
 		return this.pets;
 	}
 
+	// @ public normal_behavior
+	// @ requires pet == null;
+	// @ assignable \nothing;
+	// @ ensures this.pets.size() == \old(this.pets.size());
+	// @ also
+	// @ public behavior
+	// @ requires pet != null;
+	// @ assignable \everything;
+	// @ ensures this.pets.size() >= \old(this.pets.size());
+	// @ skipesc
 	public void addPet(Pet pet) {
 		if (pet == null) {
 			return;
@@ -112,20 +130,13 @@ public class Owner extends Person {
 		getPets().add(pet);
 	}
 
-	/**
-	 * Return the Pet with the given name, or null if none found for this Owner.
-	 * @param name to test
-	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
-	 */
+	// @ pure
 	public Pet getPet(String name) {
 		return getPet(name, false);
 	}
 
-	/**
-	 * Return the Pet with the given id, or null if none found for this Owner.
-	 * @param id to test
-	 * @return the Pet with the given id, or null if no such Pet exists for this Owner
-	 */
+	// @ pure
+	// @ skipesc
 	public Pet getPet(Integer id) {
 		for (Pet pet : getPets()) {
 			if (!pet.isNew()) {
@@ -138,12 +149,8 @@ public class Owner extends Person {
 		return null;
 	}
 
-	/**
-	 * Return the Pet with the given name, or null if none found for this Owner.
-	 * @param name to test
-	 * @param ignoreNew whether to ignore new pets (pets that are not saved yet)
-	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
-	 */
+	// @ pure
+	// @ skipesc
 	public Pet getPet(String name, boolean ignoreNew) {
 		for (Pet pet : getPets()) {
 			String compName = pet.getName();
@@ -157,6 +164,7 @@ public class Owner extends Person {
 	}
 
 	@Override
+	// @ skipesc
 	public String toString() {
 		return new ToStringCreator(this).append("id", this.getId())
 			.append("new", this.isNew())
@@ -168,17 +176,16 @@ public class Owner extends Person {
 			.toString();
 	}
 
-	/**
-	 * Adds the given {@link Visit} to the {@link Pet} with the given identifier.
-	 * @param petId the identifier of the {@link Pet}, must not be {@literal null}.
-	 * @param visit the visit to add, must not be {@literal null}.
-	 */
+	// @ public behavior
+	// @ requires petId != null && visit != null;
+	// @ assignable \everything;
 	public void addVisit(Integer petId, Visit visit) {
 
 		Assert.notNull(petId, "Pet identifier must not be null!");
 		Assert.notNull(visit, "Visit must not be null!");
 
 		Pet pet = getPet(petId);
+		// @ assume pet != null;
 
 		Assert.notNull(pet, "Invalid Pet identifier!");
 

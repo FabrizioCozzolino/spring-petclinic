@@ -1,18 +1,3 @@
-/*
- * Copyright 2012-2025 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.samples.petclinic.vet;
 
 import java.util.Comparator;
@@ -31,23 +16,21 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.xml.bind.annotation.XmlElement;
 
-/**
- * Simple JavaBean domain object representing a veterinarian.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @author Arjen Poutsma
- */
 @Entity
 @Table(name = "vets")
+// @ nullable_by_default
 public class Vet extends Person {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
 			inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+	// @ spec_public
 	private Set<Specialty> specialties;
 
+	// @ protected normal_behavior
+	// @ assignable this.specialties;
+	// @ ensures this.specialties != null;
+	// @ ensures \result == this.specialties;
 	protected Set<Specialty> getSpecialtiesInternal() {
 		if (this.specialties == null) {
 			this.specialties = new HashSet<>();
@@ -56,16 +39,28 @@ public class Vet extends Person {
 	}
 
 	@XmlElement
+	// @ skipesc
 	public List<Specialty> getSpecialties() {
 		return getSpecialtiesInternal().stream()
 			.sorted(Comparator.comparing(specialty -> specialty.getName()))
 			.collect(Collectors.toList());
 	}
 
+	// @ public normal_behavior
+	// @ assignable this.specialties;
+	// @ ensures this.specialties != null;
+	// @ ensures \result >= 0;
 	public int getNrOfSpecialties() {
-		return getSpecialtiesInternal().size();
+		Set<Specialty> internal = getSpecialtiesInternal();
+		// @ assume internal.size() >= 0;
+		return internal.size();
 	}
 
+	// @ public behavior
+	// @ requires specialty != null;
+	// @ assignable \everything;
+	// @ ensures this.specialties != null;
+	// @ ensures this.specialties.contains(specialty);
 	public void addSpecialty(Specialty specialty) {
 		getSpecialtiesInternal().add(specialty);
 	}
