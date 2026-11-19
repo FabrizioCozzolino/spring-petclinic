@@ -32,6 +32,8 @@
     <jacoco.version>0.8.15</jacoco.version>
     <junit-jupiter.version>6.1.3</junit-jupiter.version>
     <mockito.version>5.24.0</mockito.version>
+    <pitest.version>1.17.4</pitest.version>
+    <pitest-junit5.version>1.2.2</pitest-junit5.version>
     <libsass.version>0.3.4</libsass.version>
     <lifecycle-mapping>1.0.0</lifecycle-mapping>
     <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
@@ -293,18 +295,87 @@
         <version>${jacoco.version}</version>
         <executions>
           <execution>
+            <id>prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
           <execution>
             <id>report</id>
+            <phase>test</phase>
             <goals>
               <goal>report</goal>
             </goals>
-            <phase>prepare-package</phase>
+          </execution>
+          <execution>
+            <id>check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>PACKAGE</element>
+                  <excludes>
+                    <exclude>org.springframework.samples.petclinic</exclude>
+                  </excludes>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.80</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.75</minimum>
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>1.00</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>${pitest.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>${pitest-junit5.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <targetClasses>
+            <param>org.springframework.samples.petclinic.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>org.springframework.samples.petclinic.*</param>
+          </targetTests>
+          <excludedClasses>
+            <param>org.springframework.samples.petclinic.PetClinicApplication</param>
+          </excludedClasses>
+          <excludedTestClasses>
+            <param>*IntegrationTests</param>
+          </excludedTestClasses>
+          <mutationThreshold>80</mutationThreshold>
+          <coverageThreshold>80</coverageThreshold>
+          <timeoutConstant>5000</timeoutConstant>
+          <timeoutFactor>1.5</timeoutFactor>
+          <outputFormats>
+            <outputFormat>HTML</outputFormat>
+            <outputFormat>XML</outputFormat>
+          </outputFormats>
+        </configuration>
       </plugin>
 
       <!-- Spring Boot Actuator displays build-related information if a git.properties file is

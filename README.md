@@ -1,24 +1,21 @@
 # SOFTWARE DEPENDABILITY PROJECT - FABRIZIO COZZOLINO
 
 [![Java CI Pipeline](https://github.com/FabrizioCozzolino/spring-petclinic/actions/workflows/ci.yml/badge.svg)](https://github.com/FabrizioCozzolino/spring-petclinic/actions/workflows/ci.yml)
+[![Code Coverage](https://codecov.io/gh/FabrizioCozzolino/spring-petclinic/branch/main/graph/badge.svg)](https://codecov.io/gh/FabrizioCozzolino/spring-petclinic)
+[![Mutation Score](https://img.shields.io/badge/PITest%20Mutation%20Score-88%25-brightgreen)](mutation.md)
 
-- **Software Dependability Reports:** [CI/CD Pipeline Documentation](CICD.md)
+## Software Dependability Reports
 
----
+- [Lab 1: CI/CD Pipeline Documentation](CICD.md)
+- [Lab 2a: Containerization & Docker Report](Docker.md)
+- [Lab 3: Unit Testing Report (JUnit 6 & Mockito 5)](testing.md)
+- [Lab 4a: Code Coverage Report (JaCoCo)](coverage.md)
+- [Lab 4b: Mutation Testing Report (PITest)](mutation.md)
 
-### Aggiornamento del `README.md`
+## Testing, Code Coverage & Mutation Analysis
 
-Aggiungi il link a `Docker.md` accanto a quello del Lab 1 nel tuo **`README.md`**:
+Unit tests are implemented using **JUnit 6.1.3** and **Mockito 5.24.0** following the **FIRST** principles (Fast, Independent, Repeatable, Self-validating, Thorough), with automated quality gates enforced via **JaCoCo 0.8.15** and **PITest 1.17.4**:
 
-```markdown
-- **Software Dependability Reports:**
-  - [Lab 1: CI/CD Pipeline Documentation](CICD.md)
-  - [Lab 2a: Containerization & Docker Report](Docker.md)
-
-## Testing
-
-Unit tests are implemented using **JUnit 6.1.3** and **Mockito 5.24.0** following the **FIRST** principles (Fast, Independent, Repeatable, Self-validating, Thorough).
-
-- Run fast unit tests locally:
+- Run unit tests and enforce JaCoCo quality gates (`Line >= 80%`, `Branch >= 75%`, `Class = 100%`):
   ```bash
-  ./mvnw test -Dtest="!*IntegrationTests"  
+  ./mvnw clean verify -Dtest="!*IntegrationTests"
