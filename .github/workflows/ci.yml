@@ -105,6 +105,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -122,13 +124,40 @@ jobs:
           languages: java
           queries: security-and-quality
 
-      - name: Build project for CodeQL
-        run: ./mvnw clean compile -DskipTests
+      - name: Build project for CodeQL & SonarQube
+        run: ./mvnw test-compile -DskipTests
+
+      - name: Download test and JaCoCo artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-and-coverage-reports
+          path: target/
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:java-ci"
+
+      - name: GitGuardian Secret Scanning
+        uses: GitGuardian/ggshield-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+      - name: Snyk Vulnerability Scan
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
       - name: Check for open Dependabot security alerts
         run: |
