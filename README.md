@@ -11,6 +11,7 @@
 - [Lab 3: Unit Testing Report (JUnit 6 & Mockito 5)](testing.md)
 - [Lab 4a: Code Coverage Report (JaCoCo)](coverage.md)
 - [Lab 4b: Mutation Testing Report (PITest)](mutation.md)
+- [Lab 5: Microbenchmarking Report (JMH, JU2JMH & AMBER)](benchmarking.md)
 
 ## Testing, Code Coverage & Mutation Analysis
 
